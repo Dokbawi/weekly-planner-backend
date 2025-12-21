@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: weekly-planner-api-test
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/weekly_planner_test
+
+jwt:
+  secret: test-secret-key-for-jwt-minimum-32-characters
+  expiration: 86400000
