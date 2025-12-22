@@ -14,6 +14,45 @@ Spring Boot + Kotlin 기반 REST API 서버
 
 ---
 
+## 로컬 실행 가이드
+
+### 필수 요구사항
+- JDK 17+
+- MongoDB (로컬 설치 또는 Atlas)
+- Gradle 8.x (Wrapper 사용 가능)
+
+### 환경 변수 설정
+
+`.env` 파일을 프로젝트 루트에 생성하거나 환경 변수로 설정:
+
+```bash
+# MongoDB 연결 URI
+MONGODB_URI=mongodb://localhost:27017/weekly
+
+# JWT 시크릿 키 (32자 이상)
+JWT_SECRET=your-256-bit-secret-key-here-minimum-32-chars
+```
+
+### 실행 방법
+
+```bash
+# 서브모듈 초기화 (최초 1회)
+git submodule update --init --recursive
+
+# 의존성 설치 및 빌드
+./gradlew build
+
+# 애플리케이션 실행
+./gradlew bootRun
+```
+
+### 확인
+- API 서버: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- API Docs: http://localhost:8080/api-docs
+
+---
+
 ## 기술 스택
 
 | 구분 | 기술 | 버전 |
@@ -37,7 +76,9 @@ src/main/kotlin/com/planner/weekly/
 │   ├── MongoConfig.kt           # MongoDB 설정 및 인덱스
 │   ├── SecurityConfig.kt        # Spring Security + JWT
 │   ├── WebConfig.kt             # CORS 설정
-│   └── SchedulerConfig.kt       # @EnableScheduling
+│   ├── SchedulerConfig.kt       # @EnableScheduling
+│   ├── OpenApiConfig.kt         # Swagger 설정
+│   └── LoggingFilter.kt         # HTTP 요청/응답 로깅
 │
 ├── domain/
 │   ├── user/
@@ -413,6 +454,58 @@ data class ErrorDetail(
     val message: String
 )
 ```
+
+---
+
+## 구현된 API 목록
+
+### Authentication (`/api/v1/auth`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /register | 회원가입 |
+| POST | /login | 로그인 (JWT 토큰 발급) |
+
+### Weekly Plans (`/api/v1/plans`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | / | 주간 계획 생성 |
+| GET | / | 전체 주간 계획 목록 |
+| GET | /{planId} | 특정 주간 계획 조회 |
+| GET | /by-date?date={date} | 날짜로 주간 계획 조회 |
+| POST | /{planId}/confirm | 계획 확정 |
+
+### Tasks (`/api/v1/plans/{planId}/tasks`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /?date={date} | Task 추가 |
+| PUT | /{taskId} | Task 수정 |
+| DELETE | /{taskId} | Task 삭제 |
+| POST | /{taskId}/move | Task 다른 날로 이동 |
+
+### Change Logs (`/api/v1/plans/{planId}/changes`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | / | 전체 변경 이력 |
+| GET | /by-date?date={date} | 특정 날짜 변경 이력 |
+
+### Weekly Review (`/api/v1/plans/{planId}/review`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | / | 주간 회고 생성 |
+
+### Notifications (`/api/v1/notifications`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | / | 전체 알림 목록 |
+| GET | /unread | 읽지 않은 알림 |
+| GET | /unread/count | 읽지 않은 알림 수 |
+| POST | /{notificationId}/read | 알림 읽음 처리 |
+| POST | /read-all | 전체 알림 읽음 처리 |
+
+### Today (`/api/v1/today`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | / | 오늘 할 일 조회 |
 
 ---
 
