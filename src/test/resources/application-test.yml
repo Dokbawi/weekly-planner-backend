@@ -1,9 +1,12 @@
 spring:
   application:
     name: weekly-planner-api-test
-  data:
+
+de:
+  flapdoodle:
     mongodb:
-      uri: mongodb://localhost:27017/weekly_planner_test
+      embedded:
+        version: 6.0.9
 
 jwt:
   secret: test-secret-key-for-jwt-minimum-32-characters

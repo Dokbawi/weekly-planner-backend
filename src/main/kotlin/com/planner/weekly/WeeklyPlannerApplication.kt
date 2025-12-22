@@ -4,7 +4,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.scheduling.annotation.EnableScheduling
 
-@SpringBootApplication
+@SpringBootApplication(
+    exclude = [
+        de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration::class
+    ]
+)
 @EnableScheduling
 class WeeklyPlannerApplication
 
