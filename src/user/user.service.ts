@@ -57,4 +57,28 @@ export class UserService {
       .find({ 'settings.reviewDay': dayOfWeek })
       .exec();
   }
+
+  async updateSettings(userId: string, settings: any): Promise<User | null> {
+    const updateData: any = {};
+
+    if (settings.planningDay !== undefined) {
+      updateData['settings.planningDay'] = settings.planningDay;
+    }
+    if (settings.reviewDay !== undefined) {
+      updateData['settings.reviewDay'] = settings.reviewDay;
+    }
+    if (settings.timezone !== undefined) {
+      updateData['settings.timezone'] = settings.timezone;
+    }
+    if (settings.defaultReminderMinutes !== undefined) {
+      updateData['settings.defaultReminderMinutes'] = settings.defaultReminderMinutes;
+    }
+    if (settings.notificationEnabled !== undefined) {
+      updateData['settings.notificationEnabled'] = settings.notificationEnabled;
+    }
+
+    return this.userModel
+      .findByIdAndUpdate(userId, { $set: updateData }, { new: true })
+      .exec();
+  }
 }

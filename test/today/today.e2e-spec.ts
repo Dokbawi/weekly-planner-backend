@@ -20,7 +20,7 @@ describe('Today (e2e)', () => {
   });
 
   beforeEach(async () => {
-    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule.app);
+    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule!.app!);
   });
 
   describe('GET /api/v1/today', () => {
@@ -50,7 +50,7 @@ describe('Today (e2e)', () => {
       expect(res.body.data.date).toBe(today);
 
       // Check if today is within the weekly plan range
-      const planDates = createRes.body.data.dailyPlans.map((dp) => dp.date);
+      const planDates = createRes.body.data.dailyPlans.map((dp: any) => dp.date);
       if (planDates.includes(today)) {
         expect(res.body.data.tasks).toHaveLength(1);
         expect(res.body.data.tasks[0].title).toBe('Task for Today');
@@ -70,7 +70,7 @@ describe('Today (e2e)', () => {
 
       expect(res.status).toBe(200);
 
-      const planDates = createRes.body.data.dailyPlans.map((dp) => dp.date);
+      const planDates = createRes.body.data.dailyPlans.map((dp: any) => dp.date);
       if (planDates.includes(today)) {
         expect(res.body.data.tasks).toHaveLength(3);
       }
@@ -85,7 +85,7 @@ describe('Today (e2e)', () => {
 
       expect(res.status).toBe(200);
 
-      const planDates = createRes.body.data.dailyPlans.map((dp) => dp.date);
+      const planDates = createRes.body.data.dailyPlans.map((dp: any) => dp.date);
       if (planDates.includes(today)) {
         expect(res.body.data.weeklyPlan).toMatchObject({
           id: expect.any(String),

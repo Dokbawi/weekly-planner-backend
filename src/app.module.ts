@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -8,6 +8,8 @@ import { PlanModule } from './plan/plan.module';
 import { ChangelogModule } from './changelog/changelog.module';
 import { NotificationModule } from './notification/notification.module';
 import { ReviewModule } from './review/review.module';
+import { LoggerModule } from './common/logger/logger.module';
+import { MorganMiddleware } from './common/middleware/morgan.middleware';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { ReviewModule } from './review/review.module';
       inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
+    LoggerModule,
     AuthModule,
     UserModule,
     PlanModule,
@@ -33,4 +36,10 @@ import { ReviewModule } from './review/review.module';
     ReviewModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(MorganMiddleware)
+      .forRoutes('*'); // Apply to all routes
+  }
+}

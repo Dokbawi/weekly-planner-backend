@@ -57,12 +57,53 @@ export class PlanService {
     return this.toWeeklyPlanResponse(saved);
   }
 
-  async findAllByUser(userId: string): Promise<WeeklyPlanResponseDto[]> {
+  async findAllByUser(userId: string, options?: { page?: number; size?: number; status?: string }): Promise<any> {
+    const page = options?.page || 0;
+    const size = options?.size || 10;
+
+    const query: any = { userId: new Types.ObjectId(userId) };
+    if (options?.status) {
+      query.status = options.status;
+    }
+
+    const totalElements = await this.weeklyPlanModel.countDocuments(query);
     const plans = await this.weeklyPlanModel
-      .find({ userId: new Types.ObjectId(userId) })
+      .find(query)
       .sort({ weekStartDate: -1 })
+      .skip(page * size)
+      .limit(size)
       .exec();
-    return plans.map((p) => this.toWeeklyPlanResponse(p));
+
+    return {
+      content: plans.map((p) => this.toWeeklyPlanResponse(p)),
+      page,
+      size,
+      totalElements,
+      totalPages: Math.ceil(totalElements / size),
+    };
+  }
+
+  async getCurrentWeekPlan(userId: string): Promise<WeeklyPlanResponseDto> {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - dayOfWeek);
+    const weekStartDate = startOfWeek.toISOString().split('T')[0];
+
+    let plan = await this.weeklyPlanModel
+      .findOne({
+        userId: new Types.ObjectId(userId),
+        weekStartDate,
+      })
+      .exec();
+
+    if (!plan) {
+      // 자동 생성
+      const dto: CreateWeeklyPlanDto = { weekStartDate };
+      return this.createWeeklyPlan(userId, dto);
+    }
+
+    return this.toWeeklyPlanResponse(plan);
   }
 
   async findById(planId: string, userId: string): Promise<WeeklyPlanResponseDto> {
@@ -268,6 +309,25 @@ export class PlanService {
     }
 
     return this.toTaskResponse(newTask);
+  }
+
+  async updateDailyMemo(
+    planId: string,
+    userId: string,
+    date: string,
+    memo: string,
+  ): Promise<WeeklyPlanResponseDto> {
+    const plan = await this.findPlanOrThrow(planId, userId);
+
+    const dailyPlan = plan.dailyPlans.find((dp) => dp.date === date);
+    if (!dailyPlan) {
+      throw new BadRequestException(`Date ${date} is not in this weekly plan`);
+    }
+
+    dailyPlan.memo = memo;
+    const saved = await plan.save();
+
+    return this.toWeeklyPlanResponse(saved);
   }
 
   async getToday(userId: string): Promise<TodayResponseDto> {

@@ -42,11 +42,26 @@ export class PlanController {
 
   @Get()
   @ApiOperation({ summary: '전체 주간 계획 목록' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'size', required: false, type: Number })
+  @ApiQuery({ name: 'status', required: false, type: String })
   async getAllPlans(
     @CurrentUser() user: JwtPayload,
-  ): Promise<ApiRes<WeeklyPlanResponseDto[]>> {
-    const plans = await this.planService.findAllByUser(user.sub);
+    @Query('page') page?: number,
+    @Query('size') size?: number,
+    @Query('status') status?: string,
+  ): Promise<ApiRes<any>> {
+    const plans = await this.planService.findAllByUser(user.sub, { page, size, status });
     return ApiRes.ok(plans);
+  }
+
+  @Get('current')
+  @ApiOperation({ summary: '현재 주 계획 조회 (없으면 자동 생성)' })
+  async getCurrentPlan(
+    @CurrentUser() user: JwtPayload,
+  ): Promise<ApiRes<WeeklyPlanResponseDto>> {
+    const plan = await this.planService.getCurrentWeekPlan(user.sub);
+    return ApiRes.ok(plan);
   }
 
   @Get('by-date')
@@ -77,6 +92,17 @@ export class PlanController {
     @Param('planId') planId: string,
   ): Promise<ApiRes<WeeklyPlanResponseDto>> {
     const plan = await this.planService.confirmPlan(planId, user.sub);
+    return ApiRes.ok(plan);
+  }
+
+  @Put(':planId/memo')
+  @ApiOperation({ summary: '일일 메모 수정' })
+  async updateDailyMemo(
+    @CurrentUser() user: JwtPayload,
+    @Param('planId') planId: string,
+    @Body() dto: { date: string; memo: string },
+  ): Promise<ApiRes<WeeklyPlanResponseDto>> {
+    const plan = await this.planService.updateDailyMemo(planId, user.sub, dto.date, dto.memo);
     return ApiRes.ok(plan);
   }
 

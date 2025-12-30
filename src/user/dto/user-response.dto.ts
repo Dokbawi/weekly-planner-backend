@@ -12,6 +12,9 @@ export class UserSettingsResponseDto {
 
   @ApiProperty({ example: 'Asia/Seoul' })
   timezone: string;
+
+  @ApiProperty({ example: true })
+  notificationEnabled: boolean;
 }
 
 export class UserResponseDto {

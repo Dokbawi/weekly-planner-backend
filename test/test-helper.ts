@@ -48,7 +48,7 @@ const setupBeforeAll = async (
     imports: [AppModule],
   }).compile();
 
-  testGlobal.testModule.moduleFixture = moduleFixture;
+  testGlobal.testModule!.moduleFixture = moduleFixture;
 
   const app = moduleFixture.createNestApplication();
   app.setGlobalPrefix('api/v1');
@@ -70,8 +70,8 @@ const setupBeforeAll = async (
   await app.init();
   const connection = app.get(getConnectionToken());
 
-  testGlobal.testModule.app = app;
-  testGlobal.testModule.connection = connection;
+  testGlobal.testModule!.app = app;
+  testGlobal.testModule!.connection = connection;
 
   if (beforeCb) {
     try {
@@ -83,10 +83,10 @@ const setupBeforeAll = async (
 };
 
 const setupAfterAll = async (testGlobal: TestGlobal) => {
-  if (testGlobal.testModule.connection) {
+  if (testGlobal.testModule?.connection) {
     await testGlobal.testModule.connection.dropDatabase();
   }
-  await testGlobal.testModule.app?.close();
+  await testGlobal.testModule?.app?.close();
 };
 
 export const setupTestGlobal = (testGlobal: TestGlobal, config: TestModuleConfig = {}) => {
@@ -105,10 +105,10 @@ export const setupTestGlobal = (testGlobal: TestGlobal, config: TestModuleConfig
       const seeds = config.seedData();
       for (const seed of seeds) {
         try {
-          const model = testGlobal.testModule.app.get<Model<any>>(getModelToken(seed.model));
+          const model = testGlobal.testModule!.app!.get<Model<any>>(getModelToken(seed.model));
           await model.insertMany(seed.data);
           if (seed.seedAfterEach) {
-            await seed.seedAfterEach(testGlobal.testModule.moduleFixture, seed.data);
+            await seed.seedAfterEach(testGlobal.testModule!.moduleFixture!, seed.data);
           }
         } catch (e) {
           console.error(`[SEED] Error seeding ${seed.model}:`, e);
@@ -117,7 +117,7 @@ export const setupTestGlobal = (testGlobal: TestGlobal, config: TestModuleConfig
     }
 
     if (config.beforeEachCb) {
-      await config.beforeEachCb(testGlobal.testModule.moduleFixture);
+      await config.beforeEachCb(testGlobal.testModule!.moduleFixture!);
     }
   });
 
@@ -131,7 +131,7 @@ export const setupTestGlobal = (testGlobal: TestGlobal, config: TestModuleConfig
 
     for (const modelName of modelsToClear) {
       try {
-        const model = testGlobal.testModule.app.get<Model<any>>(getModelToken(modelName));
+        const model = testGlobal.testModule!.app!.get<Model<any>>(getModelToken(modelName));
         await model.deleteMany({});
       } catch (e) {
         // Model might not exist, skip
@@ -177,7 +177,7 @@ export const getAuthenticatedAgent = async (
     agent.auth(accessToken, { type: 'bearer' });
   }
 
-  return agent;
+  return agent as any;
 };
 
 export const createWeeklyPlan = async (

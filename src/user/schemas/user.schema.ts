@@ -24,6 +24,9 @@ export class UserSettings {
 
   @Prop({ default: 'Asia/Seoul' })
   timezone: string;
+
+  @Prop({ default: true })
+  notificationEnabled: boolean;
 }
 
 export const UserSettingsSchema = SchemaFactory.createForClass(UserSettings);

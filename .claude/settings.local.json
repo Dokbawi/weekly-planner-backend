@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(gradlew.bat clean:*)",
+      "Bash(if [ ! -d \".vscode\" ])",
+      "Bash(then mkdir .vscode)",
+      "Bash(fi)",
+      "Bash(curl:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npm install:*)",
+      "Bash(timeout 15 npm run start:dev)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

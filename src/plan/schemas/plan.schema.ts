@@ -62,6 +62,9 @@ export class DailyPlan {
 
   @Prop({ type: [TaskSchema], default: [] })
   tasks: Task[];
+
+  @Prop()
+  memo?: string;
 }
 
 export const DailyPlanSchema = SchemaFactory.createForClass(DailyPlan);

@@ -16,7 +16,7 @@ describe('Auth (e2e)', () => {
 
   describe('POST /api/v1/auth/register', () => {
     it('should register a new user successfully', async () => {
-      const res = await registerUser(testGlobal.testModule.app, DefaultUserInfo.testUser);
+      const res = await registerUser(testGlobal.testModule!.app!, DefaultUserInfo.testUser);
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
@@ -29,16 +29,16 @@ describe('Auth (e2e)', () => {
     });
 
     it('should fail with duplicate email', async () => {
-      await registerUser(testGlobal.testModule.app, DefaultUserInfo.testUser);
+      await registerUser(testGlobal.testModule!.app!, DefaultUserInfo.testUser);
 
-      const res = await registerUser(testGlobal.testModule.app, DefaultUserInfo.testUser);
+      const res = await registerUser(testGlobal.testModule!.app!, DefaultUserInfo.testUser);
 
       expect(res.status).toBe(409);
       expect(res.body.success).toBe(false);
     });
 
     it('should fail with invalid email format', async () => {
-      const res = await request(testGlobal.testModule.app.getHttpServer())
+      const res = await request(testGlobal.testModule!.app!.getHttpServer())
         .post('/api/v1/auth/register')
         .send({
           email: 'invalid-email',
@@ -51,7 +51,7 @@ describe('Auth (e2e)', () => {
     });
 
     it('should fail with short password', async () => {
-      const res = await request(testGlobal.testModule.app.getHttpServer())
+      const res = await request(testGlobal.testModule!.app!.getHttpServer())
         .post('/api/v1/auth/register')
         .send({
           email: 'test@example.com',
@@ -64,7 +64,7 @@ describe('Auth (e2e)', () => {
     });
 
     it('should fail with missing required fields', async () => {
-      const res = await request(testGlobal.testModule.app.getHttpServer())
+      const res = await request(testGlobal.testModule!.app!.getHttpServer())
         .post('/api/v1/auth/register')
         .send({
           email: 'test@example.com',
@@ -77,11 +77,11 @@ describe('Auth (e2e)', () => {
 
   describe('POST /api/v1/auth/login', () => {
     beforeEach(async () => {
-      await registerUser(testGlobal.testModule.app, DefaultUserInfo.testUser);
+      await registerUser(testGlobal.testModule!.app!, DefaultUserInfo.testUser);
     });
 
     it('should login successfully with valid credentials', async () => {
-      const res = await loginUser(testGlobal.testModule.app, {
+      const res = await loginUser(testGlobal.testModule!.app!, {
         email: DefaultUserInfo.testUser.email,
         password: DefaultUserInfo.testUser.password,
       });
@@ -96,7 +96,7 @@ describe('Auth (e2e)', () => {
     });
 
     it('should fail with wrong password', async () => {
-      const res = await loginUser(testGlobal.testModule.app, {
+      const res = await loginUser(testGlobal.testModule!.app!, {
         email: DefaultUserInfo.testUser.email,
         password: 'wrongpassword',
       });
@@ -106,7 +106,7 @@ describe('Auth (e2e)', () => {
     });
 
     it('should fail with non-existent email', async () => {
-      const res = await loginUser(testGlobal.testModule.app, {
+      const res = await loginUser(testGlobal.testModule!.app!, {
         email: 'nonexistent@example.com',
         password: 'password123',
       });
@@ -116,7 +116,7 @@ describe('Auth (e2e)', () => {
     });
 
     it('should fail with invalid email format', async () => {
-      const res = await request(testGlobal.testModule.app.getHttpServer())
+      const res = await request(testGlobal.testModule!.app!.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
           email: 'invalid-email',
@@ -130,14 +130,14 @@ describe('Auth (e2e)', () => {
 
   describe('Protected Routes', () => {
     it('should reject requests without authentication token', async () => {
-      const res = await request(testGlobal.testModule.app.getHttpServer())
+      const res = await request(testGlobal.testModule!.app!.getHttpServer())
         .get('/api/v1/plans');
 
       expect(res.status).toBe(401);
     });
 
     it('should reject requests with invalid token', async () => {
-      const res = await request(testGlobal.testModule.app.getHttpServer())
+      const res = await request(testGlobal.testModule!.app!.getHttpServer())
         .get('/api/v1/plans')
         .set('Authorization', 'Bearer invalid-token');
 
@@ -145,13 +145,13 @@ describe('Auth (e2e)', () => {
     });
 
     it('should accept requests with valid token', async () => {
-      await registerUser(testGlobal.testModule.app, DefaultUserInfo.testUser);
-      const loginRes = await loginUser(testGlobal.testModule.app, {
+      await registerUser(testGlobal.testModule!.app!, DefaultUserInfo.testUser);
+      const loginRes = await loginUser(testGlobal.testModule!.app!, {
         email: DefaultUserInfo.testUser.email,
         password: DefaultUserInfo.testUser.password,
       });
 
-      const res = await request(testGlobal.testModule.app.getHttpServer())
+      const res = await request(testGlobal.testModule!.app!.getHttpServer())
         .get('/api/v1/plans')
         .set('Authorization', `Bearer ${loginRes.body.data.accessToken}`);
 

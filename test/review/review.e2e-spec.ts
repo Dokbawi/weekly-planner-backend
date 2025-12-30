@@ -18,7 +18,7 @@ describe('Review (e2e)', () => {
   });
 
   beforeEach(async () => {
-    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule.app);
+    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule!.app!);
   });
 
   describe('GET /api/v1/plans/:planId/review', () => {
@@ -67,7 +67,7 @@ describe('Review (e2e)', () => {
       const res = await authenticatedAgent.get(`/api/v1/plans/${planId}/review`);
 
       expect(res.body.data.dailyBreakdown).toHaveLength(7);
-      res.body.data.dailyBreakdown.forEach((day) => {
+      res.body.data.dailyBreakdown.forEach((day: any) => {
         expect(day).toMatchObject({
           date: expect.any(String),
           totalTasks: expect.any(Number),

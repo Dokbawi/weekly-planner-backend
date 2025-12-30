@@ -1,11 +1,20 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './common/config/winston.config';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Create app with Winston logger
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger(winstonConfig),
+  });
+
+  const logger = new Logger('Bootstrap');
 
   // Global prefix
   app.setGlobalPrefix('api/v1');
@@ -16,6 +25,12 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
+
+  // Global interceptors for logging and performance monitoring
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new PerformanceInterceptor(),
+  );
 
   // Global exception filter
   app.useGlobalFilters(new GlobalExceptionFilter());
@@ -41,7 +56,14 @@ async function bootstrap() {
 
   const port = process.env.PORT || 8080;
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger UI: http://localhost:${port}/api-docs`);
+
+  logger.log(`🚀 Application is running on: http://localhost:${port}`);
+  logger.log(`📚 Swagger UI: http://localhost:${port}/api-docs`);
+  logger.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.log(`📊 Log Level: ${process.env.LOG_LEVEL || 'info'}`);
 }
-bootstrap();
+
+bootstrap().catch(err => {
+  console.error('Failed to start application:', err);
+  process.exit(1);
+});

@@ -18,7 +18,7 @@ describe('ChangeLog (e2e)', () => {
   });
 
   beforeEach(async () => {
-    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule.app);
+    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule!.app!);
   });
 
   describe('Change tracking after plan confirmation', () => {
@@ -52,7 +52,7 @@ describe('ChangeLog (e2e)', () => {
       expect(res.body.data.length).toBeGreaterThan(0);
 
       const createChange = res.body.data.find(
-        (c) => c.changeType === 'TASK_CREATED' && c.taskTitle === 'New Task After Confirm',
+        (c: any) => c.changeType === 'TASK_CREATED' && c.taskTitle === 'New Task After Confirm',
       );
       expect(createChange).toBeDefined();
     });
@@ -65,7 +65,7 @@ describe('ChangeLog (e2e)', () => {
       const res = await authenticatedAgent.get(`/api/v1/plans/${planId}/changes`);
 
       expect(res.status).toBe(200);
-      const updateChange = res.body.data.find((c) => c.changeType === 'TASK_UPDATED');
+      const updateChange = res.body.data.find((c: any) => c.changeType === 'TASK_UPDATED');
       expect(updateChange).toBeDefined();
       expect(updateChange.changes).toContainEqual(
         expect.objectContaining({
@@ -84,7 +84,7 @@ describe('ChangeLog (e2e)', () => {
       const res = await authenticatedAgent.get(`/api/v1/plans/${planId}/changes`);
 
       expect(res.status).toBe(200);
-      const deleteChange = res.body.data.find((c) => c.changeType === 'TASK_DELETED');
+      const deleteChange = res.body.data.find((c: any) => c.changeType === 'TASK_DELETED');
       expect(deleteChange).toBeDefined();
       expect(deleteChange.taskTitle).toBe('Initial Task');
     });
@@ -101,7 +101,7 @@ describe('ChangeLog (e2e)', () => {
       const res = await authenticatedAgent.get(`/api/v1/plans/${planId}/changes`);
 
       expect(res.status).toBe(200);
-      const moveChange = res.body.data.find((c) => c.changeType === 'MOVED_TO_ANOTHER_DAY');
+      const moveChange = res.body.data.find((c: any) => c.changeType === 'MOVED_TO_ANOTHER_DAY');
       expect(moveChange).toBeDefined();
     });
   });
@@ -130,7 +130,7 @@ describe('ChangeLog (e2e)', () => {
       const res = await authenticatedAgent.get(`/api/v1/plans/${planId}/changes`);
 
       if (res.body.data.length > 1) {
-        const changedTimes = res.body.data.map((c) => new Date(c.changedAt).getTime());
+        const changedTimes = res.body.data.map((c: any) => new Date(c.changedAt).getTime());
         for (let i = 1; i < changedTimes.length; i++) {
           expect(changedTimes[i - 1]).toBeGreaterThanOrEqual(changedTimes[i]);
         }
@@ -157,7 +157,7 @@ describe('ChangeLog (e2e)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      res.body.data.forEach((change) => {
+      res.body.data.forEach((change: any) => {
         expect(change.targetDate).toBe(weekStartDate);
       });
     });

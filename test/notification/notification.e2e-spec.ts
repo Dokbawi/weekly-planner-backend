@@ -18,15 +18,15 @@ describe('Notification (e2e)', () => {
   });
 
   beforeEach(async () => {
-    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule.app);
+    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule!.app!);
 
     // Get the user ID from the registered user
-    const userModel = testGlobal.testModule.app.get<Model<any>>(getModelToken('User'));
+    const userModel = testGlobal.testModule!.app!.get<Model<any>>(getModelToken('User'));
     const user = await userModel.findOne({ email: DefaultUserInfo.testUser.email });
     userId = user._id.toString();
 
     // Seed some notifications
-    const notificationModel = testGlobal.testModule.app.get<Model<any>>(
+    const notificationModel = testGlobal.testModule!.app!.get<Model<any>>(
       getModelToken('Notification'),
     );
     await notificationModel.insertMany([
@@ -68,7 +68,7 @@ describe('Notification (e2e)', () => {
       const res = await authenticatedAgent.get('/api/v1/notifications');
 
       expect(res.status).toBe(200);
-      const createdTimes = res.body.data.map((n) => new Date(n.createdAt).getTime());
+      const createdTimes = res.body.data.map((n: any) => new Date(n.createdAt).getTime());
       for (let i = 1; i < createdTimes.length; i++) {
         expect(createdTimes[i - 1]).toBeGreaterThanOrEqual(createdTimes[i]);
       }
@@ -82,7 +82,7 @@ describe('Notification (e2e)', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data).toHaveLength(2);
-      res.body.data.forEach((notification) => {
+      res.body.data.forEach((notification: any) => {
         expect(notification.isRead).toBe(false);
       });
     });

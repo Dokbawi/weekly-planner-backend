@@ -1,0 +1,16 @@
+{
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "kotlin.languageServer.enabled": true,
+  "kotlin.compiler.jvm.target": "21",
+  "kotlin.languageServer.path": "D:\\Program Files\\kotlin-compiler-2.3.0\\kotlinc",
+  "java.import.gradle.enabled": true,
+  "java.import.gradle.wrapper.enabled": true,
+  "java.jdt.ls.java.home": "C:\\Program Files\\Java\\jdk-21",
+  "java.completion.enabled": true,
+  "java.completion.favoriteStaticMembers": [
+    "org.springframework.web.bind.annotation.*"
+  ],
+  "kotlin.completion.snippets.enabled": true,
+  "claudeCodeChat.permissions.yoloMode": true
+}

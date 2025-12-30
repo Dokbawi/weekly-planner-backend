@@ -20,7 +20,7 @@ describe('Plan (e2e)', () => {
   });
 
   beforeEach(async () => {
-    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule.app);
+    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule!.app!);
   });
 
   describe('POST /api/v1/plans', () => {
@@ -47,7 +47,7 @@ describe('Plan (e2e)', () => {
     });
 
     it('should fail without authentication', async () => {
-      const res = await request(testGlobal.testModule.app.getHttpServer())
+      const res = await request(testGlobal.testModule!.app!.getHttpServer())
         .post('/api/v1/plans')
         .send({ weekStartDate });
 
@@ -71,7 +71,7 @@ describe('Plan (e2e)', () => {
 
     it('should not return plans from other users', async () => {
       const otherAgent = await getAuthenticatedAgent(
-        testGlobal.testModule.app,
+        testGlobal.testModule!.app!,
         DefaultUserInfo.testUser2,
       );
 
@@ -265,7 +265,7 @@ describe('Plan (e2e)', () => {
       await authenticatedAgent.delete(`/api/v1/plans/${planId}/tasks/${taskId}`);
 
       const planRes = await authenticatedAgent.get(`/api/v1/plans/${planId}`);
-      const dailyPlan = planRes.body.data.dailyPlans.find((dp) => dp.date === weekStartDate);
+      const dailyPlan = planRes.body.data.dailyPlans.find((dp: any) => dp.date === weekStartDate);
 
       expect(dailyPlan.tasks).toHaveLength(0);
     });
@@ -307,8 +307,8 @@ describe('Plan (e2e)', () => {
         .send({ targetDate });
 
       const planRes = await authenticatedAgent.get(`/api/v1/plans/${planId}`);
-      const sourceDailyPlan = planRes.body.data.dailyPlans.find((dp) => dp.date === weekStartDate);
-      const originalTask = sourceDailyPlan.tasks.find((t) => t.id === taskId);
+      const sourceDailyPlan = planRes.body.data.dailyPlans.find((dp: any) => dp.date === weekStartDate);
+      const originalTask = sourceDailyPlan.tasks.find((t: any) => t.id === taskId);
 
       expect(originalTask.status).toBe('POSTPONED');
     });
