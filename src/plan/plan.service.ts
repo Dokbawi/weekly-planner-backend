@@ -31,6 +31,18 @@ export class PlanService {
     userId: string,
     dto: CreateWeeklyPlanDto,
   ): Promise<WeeklyPlanResponseDto> {
+    // Check if a plan already exists for this user and week
+    const existingPlan = await this.weeklyPlanModel.findOne({
+      userId: new Types.ObjectId(userId),
+      weekStartDate: dto.weekStartDate,
+    });
+
+    if (existingPlan) {
+      throw new BadRequestException(
+        `Weekly plan already exists for week starting ${dto.weekStartDate}`,
+      );
+    }
+
     const weekStartDate = new Date(dto.weekStartDate);
     const weekEndDate = new Date(weekStartDate);
     weekEndDate.setDate(weekEndDate.getDate() + 6);
