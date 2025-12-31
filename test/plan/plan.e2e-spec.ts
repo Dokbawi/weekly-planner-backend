@@ -37,6 +37,21 @@ describe('Plan (e2e)', () => {
       expect(res.body.data.dailyPlans).toHaveLength(7);
     });
 
+    it('should fail when creating duplicate weekly plan', async () => {
+      // Create first plan
+      const firstRes = await createWeeklyPlan(authenticatedAgent, weekStartDate);
+      expect(firstRes.status).toBe(201);
+
+      // Try to create duplicate plan
+      const res = await authenticatedAgent
+        .post('/api/v1/plans')
+        .send({ weekStartDate });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.message).toContain('Weekly plan already exists');
+    });
+
     it('should fail with invalid date format', async () => {
       const res = await authenticatedAgent
         .post('/api/v1/plans')
