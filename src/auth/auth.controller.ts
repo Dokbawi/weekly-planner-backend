@@ -39,7 +39,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '현재 사용자 정보 조회' })
   @ApiResponse({ status: 200, description: '조회 성공' })
-  async getCurrentUser(@CurrentUser() userId: string): Promise<ApiRes<UserResponseDto>> {
+  async getCurrentUser(@CurrentUser('sub') userId: string): Promise<ApiRes<UserResponseDto>> {
     const user = await this.authService.getCurrentUser(userId);
     return ApiRes.ok(user);
   }
@@ -50,7 +50,7 @@ export class AuthController {
   @ApiOperation({ summary: '사용자 설정 수정' })
   @ApiResponse({ status: 200, description: '수정 성공' })
   async updateSettings(
-    @CurrentUser() userId: string,
+    @CurrentUser('sub') userId: string,
     @Body() dto: UpdateSettingsDto,
   ): Promise<ApiRes<UserResponseDto>> {
     const user = await this.authService.updateSettings(userId, dto);
