@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param } from '@nestjs/common';
+import { Controller, Get, Put, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationService } from './notification.service';
 import { NotificationResponseDto, UnreadCountResponseDto } from './dto/notification.dto';
@@ -39,7 +39,7 @@ export class NotificationController {
     return ApiResponse.ok({ count });
   }
 
-  @Post(':notificationId/read')
+  @Put(':notificationId/read')
   @ApiOperation({ summary: '알림 읽음 처리' })
   async markAsRead(
     @CurrentUser() user: JwtPayload,
@@ -52,7 +52,7 @@ export class NotificationController {
     return ApiResponse.ok(notification);
   }
 
-  @Post('read-all')
+  @Put('read-all')
   @ApiOperation({ summary: '전체 알림 읽음 처리' })
   async markAllAsRead(
     @CurrentUser() user: JwtPayload,
