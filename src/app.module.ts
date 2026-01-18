@@ -10,6 +10,7 @@ import { NotificationModule } from './notification/notification.module';
 import { ReviewModule } from './review/review.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { MorganMiddleware } from './common/middleware/morgan.middleware';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MorganMiddleware } from './common/middleware/morgan.middleware';
     }),
     ScheduleModule.forRoot(),
     LoggerModule,
+    HealthModule,
     AuthModule,
     UserModule,
     PlanModule,
