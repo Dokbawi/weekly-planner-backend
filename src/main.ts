@@ -20,11 +20,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   // CORS
-  app.enableCors({
-    origin: ['http://localhost:3000', 'https://your-domain.com'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
-  });
+  app.enableCors();
 
   // Global interceptors for logging and performance monitoring
   app.useGlobalInterceptors(
