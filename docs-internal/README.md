@@ -39,13 +39,14 @@ npm run start:dev
 
 ## 문서 구조
 
-### 📚 개발 문서
+### 개발 문서
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - 프로젝트 구조 및 기술 스택
 - **[DEVELOPMENT.md](./DEVELOPMENT.md)** - 로컬 환경 설정 및 개발 가이드
 - **[API_REFERENCE.md](./API_REFERENCE.md)** - REST API 엔드포인트 레퍼런스
 - **[IMPLEMENTATION.md](./IMPLEMENTATION.md)** - 핵심 기능 구현 상세
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - GCP Cloud Run 배포 가이드
 
-### 📋 도메인 문서 (docs/ 서브모듈)
+### 도메인 문서 (docs/ 서브모듈)
 - `docs/domain-model.md` - 도메인 모델 정의
 - `docs/api-contract.md` - REST API 계약 스펙
 - `docs/business-rules.md` - 비즈니스 규칙
@@ -66,32 +67,19 @@ npm run start:dev
 
 ---
 
-## 프로젝트 링크
+## 배포
 
-- Frontend Repository: TBD
-- Design System: TBD
-- API Documentation: [Swagger UI](http://localhost:3000/api-docs) (로컬 실행 시)
+- **플랫폼**: GCP Cloud Run
+- **CI/CD**: GitHub Actions
+- **배포 가이드**: [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
 
-## 개발 참여
+## 커밋 컨벤션
 
-### 브랜치 전략
-- `main` - 프로덕션 브랜치
-- `develop` - 개발 브랜치
-- `feature/*` - 기능 개발 브랜치
-- `bugfix/*` - 버그 수정 브랜치
-
-### 커밋 컨벤션
 - `feat:` - 새로운 기능 추가
 - `fix:` - 버그 수정
 - `docs:` - 문서 수정
 - `refactor:` - 코드 리팩토링
 - `test:` - 테스트 코드 추가/수정
 - `chore:` - 빌드 설정, 패키지 매니저 설정 등
-
----
-
-## 라이선스
-
-MIT
