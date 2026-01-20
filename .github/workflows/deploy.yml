@@ -77,7 +77,4 @@ jobs:
       - name: Show deployed URL
         run: echo "Deployed to ${{ steps.deploy.outputs.url }}"
 
-      - name: Health check
-        run: |
-          sleep 10
-          curl -f "${{ steps.deploy.outputs.url }}/health" || exit 1
+

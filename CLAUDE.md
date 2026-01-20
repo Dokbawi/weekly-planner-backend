@@ -38,10 +38,12 @@ PORT=3000
 
 | 작업 | 참조 문서 |
 |------|----------|
+| 프로젝트 전체 개요 | [PROJECT_OVERVIEW.md](./docs/PROJECT_OVERVIEW.md) |
 | API 스펙 확인 | [api-contract.md](./docs/api-contract.md) |
 | 도메인 모델 이해 | [domain-model.md](./docs/domain-model.md) |
 | 비즈니스 규칙 확인 | [business-rules.md](./docs/business-rules.md) |
 | API 연동 가이드 | [backend-integration-guide.md](./docs/backend-integration-guide.md) |
+| 백엔드 API 요청 | [backend-api-requests.md](./docs/backend-api-requests.md) |
 
 ---
 
@@ -49,15 +51,15 @@ PORT=3000
 
 ```
 src/
-├── auth/          # 인증 (JWT, Passport)
-├── user/          # 사용자 관리
-├── plan/          # 주간 계획 및 Task CRUD
-├── changelog/     # 변경 추적 시스템
-├── notification/  # 알림 및 스케줄러
-├── review/        # 주간 회고
-├── today/         # 오늘 할 일
-├── health/        # 헬스 체크
-└── common/        # 공통 모듈
+├── auth/              # 인증 (JWT, Passport)
+├── user/              # 사용자 관리
+├── plan/              # 주간 계획 및 Task CRUD
+├── changelog/         # 변경 추적 시스템
+├── notification/      # 알림 및 스케줄러
+├── review/            # 주간 회고
+├── commute-routine/   # 출퇴근 계산기
+├── health/            # 헬스 체크
+└── common/            # 공통 모듈
     ├── decorators/
     ├── filters/
     ├── interceptors/
@@ -88,6 +90,11 @@ Cron 기반 자동 알림 (리마인더, 일일 요약, 계획/회고 알림)
 - 구현: `src/review/review.service.ts`
 - 상세: [IMPLEMENTATION.md#주간-회고](./docs-internal/IMPLEMENTATION.md)
 
+### 5. 출퇴근 계산기
+도착 시간 기준 출발 시간 역산
+- 구현: `src/commute-routine/commute-routine.service.ts`
+- API: `POST /commute-routines/{id}/calculate`
+
 ---
 
 ## 기술 스택
@@ -113,6 +120,7 @@ Cron 기반 자동 알림 (리마인더, 일일 요약, 계획/회고 알림)
 | 리전 | asia-northeast3 (Seoul) |
 | CI/CD | GitHub Actions |
 | DB | MongoDB Atlas |
+| 인증 | Workload Identity Federation |
 
 상세: [DEPLOYMENT.md](./docs-internal/DEPLOYMENT.md)
 
@@ -126,13 +134,19 @@ Cron 기반 자동 알림 (리마인더, 일일 요약, 계획/회고 알림)
 | POST | /auth/login | 로그인 |
 | GET | /auth/me | 현재 사용자 |
 | GET | /plans/current | 현재 주 계획 |
+| POST | /plans/{id}/confirm | 계획 확정 |
 | POST | /plans/{id}/tasks | Task 추가 |
+| PUT | /plans/{id}/tasks/reorder | Task 순서 변경 |
 | POST | /plans/{id}/tasks/{taskId}/move | Task 이동 |
+| PUT | /plans/{id}/memo | 일일 메모 수정 |
 | GET | /plans/{id}/changes | 변경 이력 |
 | GET | /reviews/{id} | 주간 회고 |
 | GET | /notifications | 알림 목록 |
 | PUT | /notifications/{id}/read | 알림 읽음 |
 | GET | /today | 오늘 할 일 |
+| GET | /commute-routines | 출퇴근 루틴 목록 |
+| POST | /commute-routines | 루틴 생성 |
+| POST | /commute-routines/{id}/calculate | 출발 시간 계산 |
 
 전체 API: [API_REFERENCE.md](./docs-internal/API_REFERENCE.md)
 

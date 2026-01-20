@@ -90,12 +90,24 @@ src/
 │   └── dto/
 │       └── notification.dto.ts      # Notification 응답 DTO
 │
-└── review/                          # 회고 모듈
-    ├── review.module.ts
-    ├── review.service.ts            # 주간 회고 데이터 생성
-    ├── review.controller.ts         # /api/v1/plans/{planId}/review
-    └── dto/
-        └── review.dto.ts            # WeeklyReviewDto
+├── review/                          # 회고 모듈
+│   ├── review.module.ts
+│   ├── review.service.ts            # 주간 회고 데이터 생성
+│   ├── review.controller.ts         # /api/v1/reviews/{planId}
+│   └── dto/
+│       └── review.dto.ts            # WeeklyReviewDto
+│
+├── commute-routine/                 # 출퇴근 계산기 모듈
+│   ├── commute-routine.module.ts
+│   ├── commute-routine.service.ts   # 루틴 CRUD 및 출발 시간 계산
+│   ├── commute-routine.controller.ts # /api/v1/commute-routines
+│   ├── schemas/
+│   │   └── commute-routine.schema.ts # CommuteRoutine, CommuteStep 스키마
+│   └── dto/
+│       └── commute-routine.dto.ts   # CreateRoutineDto, CalculateDto 등
+│
+└── health/                          # 헬스 체크 모듈
+    └── health.controller.ts         # /health
 ```
 
 ---
@@ -115,9 +127,11 @@ AppModule
 ├── ChangelogModule
 ├── NotificationModule
 │   └── PlanModule
-└── ReviewModule
-    ├── PlanModule
-    └── ChangelogModule
+├── ReviewModule
+│   ├── PlanModule
+│   └── ChangelogModule
+├── CommuteRoutineModule
+└── HealthModule
 ```
 
 ---
@@ -175,6 +189,22 @@ AppModule
 - `isRead`: boolean
 - `createdAt`: Date
 
+### CommuteRoutine (출퇴근 루틴)
+- `_id`: ObjectId
+- `userId`: ObjectId (ref: User)
+- `name`: string (루틴 이름)
+- `destination`: string (목적지)
+- `steps`: CommuteStep[] (단계별 이동)
+- `totalMinutes`: number (총 소요 시간)
+- `defaultArrivalTime?`: string (HH:mm)
+
+### CommuteStep (이동 단계)
+- `id`: string
+- `label`: string (단계 이름)
+- `durationMinutes`: number
+- `type`: 'prepare' | 'walk' | 'bus' | 'subway' | 'taxi' | 'car' | 'bike' | 'other'
+- `order`: number
+
 **상세 스키마**: 각 모듈의 `schemas/` 디렉토리 참조
 
 ---
@@ -203,6 +233,11 @@ AppModule
 - `{ userId: 1, isRead: 1, createdAt: -1 }` (읽지 않은 알림 조회)
 
 구현 위치: `src/notification/schemas/notification.schema.ts`
+
+### CommuteRoutine
+- `{ userId: 1 }` (사용자별 루틴 조회)
+
+구현 위치: `src/commute-routine/schemas/commute-routine.schema.ts`
 
 ---
 
