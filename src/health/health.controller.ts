@@ -2,12 +2,14 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('Health')
 @Controller()
 export class HealthController {
   constructor(@InjectConnection() private readonly connection: Connection) {}
 
+  @Public()
   @Get('health')
   @ApiOperation({ summary: 'Health check endpoint' })
   @ApiResponse({ status: 200, description: 'Service is healthy' })
@@ -28,6 +30,7 @@ export class HealthController {
     };
   }
 
+  @Public()
   @Get('health/live')
   @ApiOperation({ summary: 'Liveness probe' })
   @ApiResponse({ status: 200, description: 'Service is alive' })
@@ -35,6 +38,7 @@ export class HealthController {
     return { status: 'ok' };
   }
 
+  @Public()
   @Get('health/ready')
   @ApiOperation({ summary: 'Readiness probe' })
   @ApiResponse({ status: 200, description: 'Service is ready' })
