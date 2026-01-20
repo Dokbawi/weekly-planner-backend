@@ -342,6 +342,43 @@ export class PlanService {
     return this.toWeeklyPlanResponse(saved);
   }
 
+  async reorderTasks(
+    planId: string,
+    userId: string,
+    date: string,
+    taskIds: string[],
+  ): Promise<void> {
+    const plan = await this.findPlanOrThrow(planId, userId);
+
+    const dailyPlan = plan.dailyPlans.find((dp) => dp.date === date);
+    if (!dailyPlan) {
+      throw new BadRequestException(`Date ${date} is not in this weekly plan`);
+    }
+
+    // Create a map of taskId -> task
+    const taskMap = new Map(dailyPlan.tasks.map((t) => [t.id, t]));
+
+    // Validate that all taskIds exist
+    for (const taskId of taskIds) {
+      if (!taskMap.has(taskId)) {
+        throw new BadRequestException(`Task ${taskId} not found in date ${date}`);
+      }
+    }
+
+    // Reorder tasks based on taskIds array
+    const reorderedTasks = taskIds
+      .map((id) => taskMap.get(id))
+      .filter((t): t is NonNullable<typeof t> => t !== undefined);
+
+    // Add any tasks that weren't in the taskIds array at the end
+    const remainingTasks = dailyPlan.tasks.filter(
+      (t) => !taskIds.includes(t.id),
+    );
+
+    dailyPlan.tasks = [...reorderedTasks, ...remainingTasks];
+    await plan.save();
+  }
+
   async getToday(userId: string): Promise<TodayResponseDto> {
     const today = new Date().toISOString().split('T')[0];
     const plan = await this.weeklyPlanModel

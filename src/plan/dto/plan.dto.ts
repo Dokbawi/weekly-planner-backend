@@ -92,6 +92,30 @@ export class MoveTaskDto {
   reason?: string;
 }
 
+export class UpdateMemoDto {
+  @ApiProperty({ example: '2024-01-15', description: '메모를 수정할 날짜' })
+  @IsDateString()
+  date: string;
+
+  @ApiProperty({ example: '오늘의 메모 내용', description: '메모 내용' })
+  @IsString()
+  memo: string;
+}
+
+export class ReorderTasksDto {
+  @ApiProperty({ example: '2026-01-19', description: '재정렬할 날짜' })
+  @IsDateString()
+  date: string;
+
+  @ApiProperty({
+    example: ['task-3', 'task-1', 'task-2'],
+    description: '정렬된 Task ID 목록',
+  })
+  @IsArray()
+  @IsString({ each: true })
+  taskIds: string[];
+}
+
 export class CreateWeeklyPlanDto {
   @ApiProperty({ example: '2024-01-14' })
   @IsDateString()

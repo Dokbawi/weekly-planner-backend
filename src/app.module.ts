@@ -11,6 +11,7 @@ import { ReviewModule } from './review/review.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { MorganMiddleware } from './common/middleware/morgan.middleware';
 import { HealthModule } from './health/health.module';
+import { CommuteRoutineModule } from './commute-routine/commute-routine.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { HealthModule } from './health/health.module';
     ChangelogModule,
     NotificationModule,
     ReviewModule,
+    CommuteRoutineModule,
   ],
 })
 export class AppModule implements NestModule {

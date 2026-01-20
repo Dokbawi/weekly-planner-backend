@@ -15,6 +15,8 @@ import {
   CreateTaskDto,
   UpdateTaskDto,
   MoveTaskDto,
+  UpdateMemoDto,
+  ReorderTasksDto,
   WeeklyPlanResponseDto,
   TaskResponseDto,
   TodayResponseDto,
@@ -100,7 +102,7 @@ export class PlanController {
   async updateDailyMemo(
     @CurrentUser() user: JwtPayload,
     @Param('planId') planId: string,
-    @Body() dto: { date: string; memo: string },
+    @Body() dto: UpdateMemoDto,
   ): Promise<ApiRes<WeeklyPlanResponseDto>> {
     const plan = await this.planService.updateDailyMemo(planId, user.sub, dto.date, dto.memo);
     return ApiRes.ok(plan);
@@ -154,6 +156,17 @@ export class PlanController {
   ): Promise<ApiRes<TaskResponseDto>> {
     const task = await this.planService.moveTask(planId, user.sub, taskId, dto);
     return ApiRes.ok(task);
+  }
+
+  @Put(':planId/tasks/reorder')
+  @ApiOperation({ summary: 'Task 순서 변경' })
+  async reorderTasks(
+    @CurrentUser() user: JwtPayload,
+    @Param('planId') planId: string,
+    @Body() dto: ReorderTasksDto,
+  ): Promise<ApiRes<null>> {
+    await this.planService.reorderTasks(planId, user.sub, dto.date, dto.taskIds);
+    return ApiRes.ok(null);
   }
 }
 
