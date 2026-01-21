@@ -25,6 +25,12 @@ import { CommuteRoutineModule } from './commute-routine/commute-routine.module';
           'MONGODB_URI',
           'mongodb://localhost:27017/weekly_planner',
         ),
+        // 커넥션 풀 최적화 (동시 접속 처리 향상)
+        maxPoolSize: 50, // 최대 커넥션 수 (기본값 10)
+        minPoolSize: 5, // 최소 커넥션 수 (워밍업)
+        maxIdleTimeMS: 30000, // 유휴 커넥션 정리 (30초)
+        serverSelectionTimeoutMS: 5000, // 서버 선택 타임아웃
+        socketTimeoutMS: 45000, // 소켓 타임아웃
       }),
       inject: [ConfigService],
     }),

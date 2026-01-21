@@ -18,7 +18,13 @@
       "Bash(git rebase:*)",
       "Bash(npm run build:*)",
       "Bash(npx nest generate:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(gcloud run services describe:*)",
+      "Bash(where k6:*)",
+      "Bash(bash:*)",
+      "Bash(k6 run:*)",
+      "Bash(powershell -Command \"k6 version\")",
+      "Bash(powershell -Command:*)"
     ],
     "deny": [],
     "ask": []

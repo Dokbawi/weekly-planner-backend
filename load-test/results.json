@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-01-21T03:10:41.936Z",
+  "base_url": "https://weekly-planner-backend-gm4tlivy5q-du.a.run.app",
+  "metrics": {
+    "http_req_duration": {
+      "avg": 2050.357846086707,
+      "p95": 5571.586885,
+      "max": 33510.2824
+    },
+    "http_reqs": {
+      "count": 22794,
+      "rate": 90.14971048992365
+    },
+    "errors": {
+      "rate": 0
+    },
+    "cold_start_time": 23.2745
+  },
+  "checks": {
+    "passed": 22792,
+    "failed": 0
+  }
+}

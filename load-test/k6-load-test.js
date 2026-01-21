@@ -19,16 +19,17 @@ export const options = {
       startTime: '0s',
       maxDuration: '30s',
     },
-    // 2. 점진적 부하 테스트
+    // 2. 점진적 부하 테스트 (500 VUs)
     load_test: {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: [
-        { duration: '30s', target: 10 },  // 10 VUs까지 증가
-        { duration: '1m', target: 10 },   // 10 VUs 유지
-        { duration: '30s', target: 50 },  // 50 VUs까지 증가
-        { duration: '1m', target: 50 },   // 50 VUs 유지
-        { duration: '30s', target: 0 },   // 종료
+        { duration: '30s', target: 50 },   // 50 VUs까지 증가 (워밍업)
+        { duration: '30s', target: 100 },  // 100 VUs까지 증가
+        { duration: '30s', target: 250 },  // 250 VUs까지 증가
+        { duration: '30s', target: 500 },  // 500 VUs까지 증가
+        { duration: '1m', target: 500 },   // 500 VUs 유지 (피크)
+        { duration: '30s', target: 0 },    // 종료
       ],
       startTime: '35s',  // cold_start 후 시작
     },
@@ -126,28 +127,34 @@ export default function (data) {
 }
 
 export function handleSummary(data) {
+  const duration = data.metrics.http_req_duration && data.metrics.http_req_duration.values;
+  const reqs = data.metrics.http_reqs && data.metrics.http_reqs.values;
+  const errs = data.metrics.errors && data.metrics.errors.values;
+  const coldStart = data.metrics.cold_start_time && data.metrics.cold_start_time.values;
+  const checks = data.root_group && data.root_group.checks;
+
   const summary = {
     timestamp: new Date().toISOString(),
     base_url: BASE_URL,
     metrics: {
       http_req_duration: {
-        avg: data.metrics.http_req_duration?.values?.avg,
-        p95: data.metrics.http_req_duration?.values?.['p(95)'],
-        p99: data.metrics.http_req_duration?.values?.['p(99)'],
-        max: data.metrics.http_req_duration?.values?.max,
+        avg: duration ? duration.avg : null,
+        p95: duration ? duration['p(95)'] : null,
+        p99: duration ? duration['p(99)'] : null,
+        max: duration ? duration.max : null,
       },
       http_reqs: {
-        count: data.metrics.http_reqs?.values?.count,
-        rate: data.metrics.http_reqs?.values?.rate,
+        count: reqs ? reqs.count : null,
+        rate: reqs ? reqs.rate : null,
       },
       errors: {
-        rate: data.metrics.errors?.values?.rate,
+        rate: errs ? errs.rate : null,
       },
-      cold_start_time: data.metrics.cold_start_time?.values?.avg,
+      cold_start_time: coldStart ? coldStart.avg : null,
     },
     checks: {
-      passed: data.root_group?.checks?.reduce((sum, c) => sum + c.passes, 0) || 0,
-      failed: data.root_group?.checks?.reduce((sum, c) => sum + c.fails, 0) || 0,
+      passed: checks ? checks.reduce(function(sum, c) { return sum + c.passes; }, 0) : 0,
+      failed: checks ? checks.reduce(function(sum, c) { return sum + c.fails; }, 0) : 0,
     },
   };
 
