@@ -98,12 +98,12 @@ describe('Notification (e2e)', () => {
     });
   });
 
-  describe('POST /api/v1/notifications/:notificationId/read', () => {
+  describe('PUT /api/v1/notifications/:notificationId/read', () => {
     it('should mark notification as read', async () => {
       const listRes = await authenticatedAgent.get('/api/v1/notifications/unread');
       const notificationId = listRes.body.data[0].id;
 
-      const res = await authenticatedAgent.post(`/api/v1/notifications/${notificationId}/read`);
+      const res = await authenticatedAgent.put(`/api/v1/notifications/${notificationId}/read`);
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
@@ -120,9 +120,9 @@ describe('Notification (e2e)', () => {
     });
   });
 
-  describe('POST /api/v1/notifications/read-all', () => {
+  describe('PUT /api/v1/notifications/read-all', () => {
     it('should mark all notifications as read', async () => {
-      const res = await authenticatedAgent.post('/api/v1/notifications/read-all');
+      const res = await authenticatedAgent.put('/api/v1/notifications/read-all');
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);

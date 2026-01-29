@@ -163,3 +163,90 @@ npm run lint         # 린트
 ```
 
 상세: [DEVELOPMENT.md](./docs-internal/DEVELOPMENT.md)
+
+---
+
+## 테스트
+
+### 테스트 구조
+
+```
+test/
+├── test-helper.ts           # 공통 테스트 유틸 (인증, 헬퍼 함수)
+├── auth/
+│   └── auth.e2e-spec.ts     # 인증 API 테스트
+├── plan/
+│   └── plan.e2e-spec.ts     # 주간 계획, Task CRUD 테스트
+├── today/
+│   └── today.e2e-spec.ts    # 오늘 할 일 API 테스트
+├── notification/
+│   └── notification.e2e-spec.ts  # 알림 API 테스트
+├── changelog/
+│   └── changelog.e2e-spec.ts     # 변경 추적 테스트
+├── review/
+│   └── review.e2e-spec.ts   # 주간 회고 테스트
+├── commute-routine/
+│   └── commute-routine.e2e-spec.ts  # 출퇴근 루틴 테스트
+└── health/
+    └── health.e2e-spec.ts   # 헬스 체크 테스트
+```
+
+### 테스트 실행
+
+```bash
+# 전체 E2E 테스트
+npm run test:e2e
+
+# 특정 모듈 테스트
+npm run test:e2e -- --testPathPattern=auth
+npm run test:e2e -- --testPathPattern=plan
+npm run test:e2e -- --testPathPattern=commute-routine
+
+# watch 모드
+npm run test:e2e -- --watch
+```
+
+### 테스트 헬퍼 사용법
+
+```typescript
+import {
+  setupTestGlobal,
+  TestGlobal,
+  getAuthenticatedAgent,
+  createWeeklyPlan,
+  addTask,
+  getWeekStartDate,
+} from '../test-helper';
+
+describe('MyModule (e2e)', () => {
+  const testGlobal: TestGlobal = {};
+  let authenticatedAgent: SuperAgentTest;
+
+  setupTestGlobal(testGlobal, {
+    needToClearModels: ['User', 'WeeklyPlan'],
+  });
+
+  beforeEach(async () => {
+    authenticatedAgent = await getAuthenticatedAgent(testGlobal.testModule!.app!);
+  });
+
+  it('should do something', async () => {
+    const res = await authenticatedAgent.get('/api/v1/endpoint');
+    expect(res.status).toBe(200);
+  });
+});
+```
+
+### 부하 테스트
+
+```bash
+# k6 설치 후 실행
+k6 run load-test/k6-load-test.js
+
+# 환경변수로 URL 지정
+k6 run -e BASE_URL=https://your-server.run.app load-test/k6-load-test.js
+```
+
+- 스크립트: `load-test/k6-load-test.js`
+- 시나리오: 500 VUs 점진적 부하 테스트
+- 결과: `load-test/results.json`

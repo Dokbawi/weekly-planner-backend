@@ -11,6 +11,7 @@ import { User } from '../src/user/schemas/user.schema';
 import { WeeklyPlan } from '../src/plan/schemas/plan.schema';
 import { ChangeLog } from '../src/changelog/schemas/changelog.schema';
 import { Notification } from '../src/notification/schemas/notification.schema';
+import { CommuteRoutine } from '../src/commute-routine/schemas/commute-routine.schema';
 
 export interface TestModule {
   app?: INestApplication;
@@ -127,6 +128,7 @@ export const setupTestGlobal = (testGlobal: TestGlobal, config: TestModuleConfig
       WeeklyPlan.name,
       ChangeLog.name,
       Notification.name,
+      CommuteRoutine.name,
     ];
 
     for (const modelName of modelsToClear) {
