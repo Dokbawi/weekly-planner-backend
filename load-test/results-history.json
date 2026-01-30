@@ -1,0 +1,77 @@
+{
+  "tests": [
+    {
+      "label": "1차: JWT + MongoDB 커넥션 풀 최적화 (캐싱 전)",
+      "timestamp": "2026-01-29T00:00:00.000Z",
+      "vus": 500,
+      "optimizations": ["JWT DB 쿼리 제거", "MongoDB 커넥션 풀 (maxPoolSize: 50)"],
+      "metrics": {
+        "http_req_duration": {
+          "avg": 1100,
+          "p95": 2691,
+          "max": 33510
+        },
+        "http_reqs": {
+          "count": null,
+          "rate": 144
+        },
+        "errors": {
+          "rate": 0
+        }
+      }
+    },
+    {
+      "label": "2차: Redis 캐싱 적용 후 (500 VU)",
+      "timestamp": "2026-01-30T04:24:56.416Z",
+      "vus": 500,
+      "optimizations": ["JWT DB 쿼리 제거", "MongoDB 커넥션 풀", "Redis Cache-Aside 패턴"],
+      "metrics": {
+        "http_req_duration": {
+          "avg": 226.09,
+          "p95": 816.82,
+          "max": 11426.9
+        },
+        "http_reqs": {
+          "count": 76254,
+          "rate": 308.48
+        },
+        "errors": {
+          "rate": 0
+        }
+      }
+    },
+    {
+      "label": "3차: Redis 캐싱 적용 후 (1000 VU)",
+      "timestamp": "2026-01-30T04:34:37.686Z",
+      "vus": 1000,
+      "optimizations": ["JWT DB 쿼리 제거", "MongoDB 커넥션 풀", "Redis Cache-Aside 패턴"],
+      "metrics": {
+        "http_req_duration": {
+          "avg": 291.42,
+          "p95": 861.68,
+          "max": 26508.24
+        },
+        "http_reqs": {
+          "count": 142890,
+          "rate": 577.66
+        },
+        "errors": {
+          "rate": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "comparison_500vu": {
+      "avg_improvement": "79% (1100ms → 226ms)",
+      "p95_improvement": "70% (2691ms → 817ms)",
+      "throughput_improvement": "114% (144 → 308 req/s)"
+    },
+    "scaling_1000vu": {
+      "avg": "291ms (안정적)",
+      "p95": "862ms (안정적)",
+      "throughput": "578 req/s (선형 스케일링)",
+      "errors": "0%"
+    }
+  }
+}

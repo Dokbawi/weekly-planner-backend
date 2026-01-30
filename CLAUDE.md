@@ -17,6 +17,7 @@ npm run start:dev
 ```env
 MONGODB_URI=mongodb://localhost:27017/weekly_planner
 JWT_SECRET=your-256-bit-secret-key-minimum-32-chars
+REDIS_URL=redis://localhost:6379    # 미설정 시 인메모리 캐시 사용
 PORT=3000
 ```
 
@@ -60,6 +61,7 @@ src/
 ├── commute-routine/   # 출퇴근 계산기
 ├── health/            # 헬스 체크
 └── common/            # 공통 모듈
+    ├── cache/         # Redis/인메모리 캐시 (Cache-Aside)
     ├── decorators/
     ├── filters/
     ├── interceptors/
@@ -95,6 +97,13 @@ Cron 기반 자동 알림 (리마인더, 일일 요약, 계획/회고 알림)
 - 구현: `src/commute-routine/commute-routine.service.ts`
 - API: `POST /commute-routines/{id}/calculate`
 
+### 6. Redis 캐싱 (Cache-Aside 패턴)
+읽기 빈도가 높은 API에 캐시 적용, 쓰기 시 자동 무효화
+- 구현: `src/common/cache/cache.module.ts`, `src/common/cache/cache.service.ts`
+- 적용 서비스: plan (5분), notification (2분), commute-routine (30분), review (30분)
+- `REDIS_URL` 설정 시 Redis, 미설정 시 인메모리 캐시 자동 전환
+- 모든 캐시 연산은 실패 시 graceful fallback (서비스 중단 없음)
+
 ---
 
 ## 기술 스택
@@ -105,6 +114,7 @@ Cron 기반 자동 알림 (리마인더, 일일 요약, 계획/회고 알림)
 | Language | TypeScript 5.3+ |
 | Database | MongoDB 8.0+ (Mongoose) |
 | Auth | JWT (Passport) |
+| Cache | Redis (cache-manager + cache-manager-redis-yet) |
 | Scheduler | @nestjs/schedule |
 | Docs | Swagger (OpenAPI) |
 
@@ -120,6 +130,7 @@ Cron 기반 자동 알림 (리마인더, 일일 요약, 계획/회고 알림)
 | 리전 | asia-northeast3 (Seoul) |
 | CI/CD | GitHub Actions |
 | DB | MongoDB Atlas |
+| Cache | Redis Cloud (Free tier) |
 | 인증 | Workload Identity Federation |
 
 상세: [DEPLOYMENT.md](./docs-internal/DEPLOYMENT.md)
@@ -249,4 +260,5 @@ k6 run -e BASE_URL=https://your-server.run.app load-test/k6-load-test.js
 
 - 스크립트: `load-test/k6-load-test.js`
 - 시나리오: 500 VUs 점진적 부하 테스트
-- 결과: `load-test/results.json`
+- 최신 결과: `load-test/results.json`
+- 결과 히스토리: `load-test/results-history.json`
