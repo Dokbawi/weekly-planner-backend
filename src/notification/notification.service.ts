@@ -3,12 +3,19 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Notification, NotificationType } from './schemas/notification.schema';
 import { NotificationResponseDto } from './dto/notification.dto';
+import { CacheService } from '../common/cache/cache.service';
+
+const TTL = {
+  NOTIFICATIONS: 2 * 60 * 1000, // 2분
+  UNREAD_COUNT: 2 * 60 * 1000,  // 2분
+};
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectModel(Notification.name)
     private notificationModel: Model<Notification>,
+    private cacheService: CacheService,
   ) {}
 
   async create(params: {
@@ -31,17 +38,27 @@ export class NotificationService {
       isRead: false,
     });
 
-    return notification.save();
+    const saved = await notification.save();
+    await this.invalidateNotificationCache(params.userId);
+    return saved;
   }
 
   async findAllByUser(userId: string): Promise<NotificationResponseDto[]> {
-    const notifications = await this.notificationModel
-      .find({ userId: new Types.ObjectId(userId) })
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .exec();
+    const cacheKey = `notification:all:${userId}`;
 
-    return notifications.map((n) => this.toNotificationResponse(n));
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const notifications = await this.notificationModel
+          .find({ userId: new Types.ObjectId(userId) })
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .exec();
+
+        return notifications.map((n) => this.toNotificationResponse(n));
+      },
+      TTL.NOTIFICATIONS,
+    );
   }
 
   async findUnreadByUser(userId: string): Promise<NotificationResponseDto[]> {
@@ -57,12 +74,20 @@ export class NotificationService {
   }
 
   async getUnreadCount(userId: string): Promise<number> {
-    return this.notificationModel
-      .countDocuments({
-        userId: new Types.ObjectId(userId),
-        isRead: false,
-      })
-      .exec();
+    const cacheKey = `notification:count:${userId}`;
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        return this.notificationModel
+          .countDocuments({
+            userId: new Types.ObjectId(userId),
+            isRead: false,
+          })
+          .exec();
+      },
+      TTL.UNREAD_COUNT,
+    );
   }
 
   async markAsRead(
@@ -87,6 +112,7 @@ export class NotificationService {
       throw new NotFoundException('Notification not found');
     }
 
+    await this.invalidateNotificationCache(userId);
     return this.toNotificationResponse(notification);
   }
 
@@ -103,6 +129,15 @@ export class NotificationService {
         },
       )
       .exec();
+
+    await this.invalidateNotificationCache(userId);
+  }
+
+  private async invalidateNotificationCache(userId: string): Promise<void> {
+    await this.cacheService.delMany([
+      `notification:all:${userId}`,
+      `notification:count:${userId}`,
+    ]);
   }
 
   private toNotificationResponse(

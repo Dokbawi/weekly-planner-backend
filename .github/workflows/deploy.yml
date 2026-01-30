@@ -73,6 +73,7 @@ jobs:
           secrets: |
             MONGODB_URI=MONGODB_URI:latest
             JWT_SECRET=JWT_SECRET:latest
+            REDIS_URL=REDIS_URL:latest
 
       - name: Show deployed URL
         run: echo "Deployed to ${{ steps.deploy.outputs.url }}"

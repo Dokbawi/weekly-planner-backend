@@ -19,19 +19,26 @@ import {
 } from './dto/plan.dto';
 import { ChangelogService } from '../changelog/changelog.service';
 import { ChangeType } from '../changelog/schemas/changelog.schema';
+import { CacheService } from '../common/cache/cache.service';
+
+const TTL = {
+  CURRENT_PLAN: 5 * 60 * 1000, // 5분
+  TODAY: 5 * 60 * 1000,        // 5분
+  PLAN_BY_ID: 15 * 60 * 1000,  // 15분
+};
 
 @Injectable()
 export class PlanService {
   constructor(
     @InjectModel(WeeklyPlan.name) private weeklyPlanModel: Model<WeeklyPlan>,
     private changelogService: ChangelogService,
+    private cacheService: CacheService,
   ) {}
 
   async createWeeklyPlan(
     userId: string,
     dto: CreateWeeklyPlanDto,
   ): Promise<WeeklyPlanResponseDto> {
-    // Check if a plan already exists for this user and week
     const existingPlan = await this.weeklyPlanModel.findOne({
       userId: new Types.ObjectId(userId),
       weekStartDate: dto.weekStartDate,
@@ -66,6 +73,7 @@ export class PlanService {
     });
 
     const saved = await plan.save();
+    await this.invalidatePlanCache(userId);
     return this.toWeeklyPlanResponse(saved);
   }
 
@@ -96,31 +104,46 @@ export class PlanService {
   }
 
   async getCurrentWeekPlan(userId: string): Promise<WeeklyPlanResponseDto> {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - dayOfWeek);
-    const weekStartDate = startOfWeek.toISOString().split('T')[0];
+    const cacheKey = `plan:current:${userId}`;
 
-    let plan = await this.weeklyPlanModel
-      .findOne({
-        userId: new Types.ObjectId(userId),
-        weekStartDate,
-      })
-      .exec();
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - dayOfWeek);
+        const weekStartDate = startOfWeek.toISOString().split('T')[0];
 
-    if (!plan) {
-      // 자동 생성
-      const dto: CreateWeeklyPlanDto = { weekStartDate };
-      return this.createWeeklyPlan(userId, dto);
-    }
+        let plan = await this.weeklyPlanModel
+          .findOne({
+            userId: new Types.ObjectId(userId),
+            weekStartDate,
+          })
+          .exec();
 
-    return this.toWeeklyPlanResponse(plan);
+        if (!plan) {
+          const dto: CreateWeeklyPlanDto = { weekStartDate };
+          return this.createWeeklyPlan(userId, dto);
+        }
+
+        return this.toWeeklyPlanResponse(plan);
+      },
+      TTL.CURRENT_PLAN,
+    );
   }
 
   async findById(planId: string, userId: string): Promise<WeeklyPlanResponseDto> {
-    const plan = await this.findPlanOrThrow(planId, userId);
-    return this.toWeeklyPlanResponse(plan);
+    const cacheKey = `plan:id:${planId}:${userId}`;
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const plan = await this.findPlanOrThrow(planId, userId);
+        return this.toWeeklyPlanResponse(plan);
+      },
+      TTL.PLAN_BY_ID,
+    );
   }
 
   async findByDate(date: string, userId: string): Promise<WeeklyPlanResponseDto | null> {
@@ -144,6 +167,7 @@ export class PlanService {
     plan.status = PlanStatus.CONFIRMED;
     plan.confirmedAt = new Date();
     const saved = await plan.save();
+    await this.invalidatePlanCache(userId, planId);
     return this.toWeeklyPlanResponse(saved);
   }
 
@@ -187,6 +211,7 @@ export class PlanService {
       });
     }
 
+    await this.invalidatePlanCache(userId, planId);
     return this.toTaskResponse(task);
   }
 
@@ -245,6 +270,7 @@ export class PlanService {
       });
     }
 
+    await this.invalidatePlanCache(userId, planId);
     return this.toTaskResponse(task);
   }
 
@@ -272,6 +298,8 @@ export class PlanService {
         reason,
       });
     }
+
+    await this.invalidatePlanCache(userId, planId);
   }
 
   async moveTask(
@@ -320,6 +348,7 @@ export class PlanService {
       });
     }
 
+    await this.invalidatePlanCache(userId, planId);
     return this.toTaskResponse(newTask);
   }
 
@@ -339,6 +368,7 @@ export class PlanService {
     dailyPlan.memo = memo;
     const saved = await plan.save();
 
+    await this.invalidatePlanCache(userId, planId);
     return this.toWeeklyPlanResponse(saved);
   }
 
@@ -377,30 +407,56 @@ export class PlanService {
 
     dailyPlan.tasks = [...reorderedTasks, ...remainingTasks];
     await plan.save();
+
+    await this.invalidatePlanCache(userId, planId);
   }
 
   async getToday(userId: string): Promise<TodayResponseDto> {
     const today = new Date().toISOString().split('T')[0];
-    const plan = await this.weeklyPlanModel
-      .findOne({
-        userId: new Types.ObjectId(userId),
-        weekStartDate: { $lte: today },
-        weekEndDate: { $gte: today },
-      })
-      .exec();
+    const cacheKey = `plan:today:${userId}:${today}`;
 
-    if (!plan) {
-      return { date: today, tasks: [] };
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const plan = await this.weeklyPlanModel
+          .findOne({
+            userId: new Types.ObjectId(userId),
+            weekStartDate: { $lte: today },
+            weekEndDate: { $gte: today },
+          })
+          .exec();
+
+        if (!plan) {
+          return { date: today, tasks: [] };
+        }
+
+        const dailyPlan = plan.dailyPlans.find((dp) => dp.date === today);
+        const tasks = dailyPlan?.tasks || [];
+
+        return {
+          date: today,
+          weeklyPlan: this.toWeeklyPlanResponse(plan),
+          tasks: tasks.map((t) => this.toTaskResponse(t)),
+        };
+      },
+      TTL.TODAY,
+    );
+  }
+
+  /**
+   * Plan 관련 캐시 일괄 무효화
+   */
+  private async invalidatePlanCache(userId: string, planId?: string): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+    const keys = [
+      `plan:current:${userId}`,
+      `plan:today:${userId}:${today}`,
+    ];
+    if (planId) {
+      keys.push(`plan:id:${planId}:${userId}`);
+      keys.push(`review:${planId}`);
     }
-
-    const dailyPlan = plan.dailyPlans.find((dp) => dp.date === today);
-    const tasks = dailyPlan?.tasks || [];
-
-    return {
-      date: today,
-      weeklyPlan: this.toWeeklyPlanResponse(plan),
-      tasks: tasks.map((t) => this.toTaskResponse(t)),
-    };
+    await this.cacheService.delMany(keys);
   }
 
   private async findPlanOrThrow(planId: string, userId: string): Promise<WeeklyPlan> {

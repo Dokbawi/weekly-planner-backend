@@ -4,15 +4,31 @@ import { Model, Types } from 'mongoose';
 import { WeeklyPlan, TaskStatus } from '../plan/schemas/plan.schema';
 import { ChangeLog, ChangeType } from '../changelog/schemas/changelog.schema';
 import { WeeklyReviewResponseDto, ReviewStatisticsDto, DailyBreakdownDto } from './dto/review.dto';
+import { CacheService } from '../common/cache/cache.service';
+
+const TTL = {
+  REVIEW: 30 * 60 * 1000, // 30분
+};
 
 @Injectable()
 export class ReviewService {
   constructor(
     @InjectModel(WeeklyPlan.name) private weeklyPlanModel: Model<WeeklyPlan>,
     @InjectModel(ChangeLog.name) private changeLogModel: Model<ChangeLog>,
+    private cacheService: CacheService,
   ) {}
 
   async generateReview(planId: string, userId: string): Promise<WeeklyReviewResponseDto> {
+    const cacheKey = `review:${planId}`;
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.doGenerateReview(planId, userId),
+      TTL.REVIEW,
+    );
+  }
+
+  private async doGenerateReview(planId: string, userId: string): Promise<WeeklyReviewResponseDto> {
     const plan = await this.weeklyPlanModel
       .findOne({
         _id: new Types.ObjectId(planId),

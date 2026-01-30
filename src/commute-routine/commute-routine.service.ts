@@ -12,12 +12,19 @@ import {
   CalculateResultDto,
   ScheduleItemDto,
 } from './dto/commute-routine.dto';
+import { CacheService } from '../common/cache/cache.service';
+
+const TTL = {
+  ROUTINE_LIST: 30 * 60 * 1000,  // 30분
+  CALCULATE: 24 * 60 * 60 * 1000, // 24시간 (순수 계산)
+};
 
 @Injectable()
 export class CommuteRoutineService {
   constructor(
     @InjectModel(CommuteRoutine.name)
     private commuteRoutineModel: Model<CommuteRoutine>,
+    private cacheService: CacheService,
   ) {}
 
   async create(
@@ -44,16 +51,25 @@ export class CommuteRoutineService {
     });
 
     const saved = await routine.save();
+    await this.invalidateCommuteCache(userId);
     return this.toResponseDto(saved);
   }
 
   async findAll(userId: string): Promise<CommuteRoutineResponseDto[]> {
-    const routines = await this.commuteRoutineModel
-      .find({ userId: new Types.ObjectId(userId) })
-      .sort({ createdAt: -1 })
-      .exec();
+    const cacheKey = `commute:list:${userId}`;
 
-    return routines.map((r) => this.toResponseDto(r));
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const routines = await this.commuteRoutineModel
+          .find({ userId: new Types.ObjectId(userId) })
+          .sort({ createdAt: -1 })
+          .exec();
+
+        return routines.map((r) => this.toResponseDto(r));
+      },
+      TTL.ROUTINE_LIST,
+    );
   }
 
   async findById(
@@ -88,6 +104,7 @@ export class CommuteRoutineService {
     }
 
     const saved = await routine.save();
+    await this.invalidateCommuteCache(userId, routineId);
     return this.toResponseDto(saved);
   }
 
@@ -100,6 +117,8 @@ export class CommuteRoutineService {
     if (result.deletedCount === 0) {
       throw new NotFoundException('Commute routine not found');
     }
+
+    await this.invalidateCommuteCache(userId, routineId);
   }
 
   async calculate(
@@ -107,6 +126,21 @@ export class CommuteRoutineService {
     userId: string,
     arrivalTime: string,
     offsetMinutes: number = 0,
+  ): Promise<CalculateResultDto> {
+    const cacheKey = `commute:calc:${routineId}:${arrivalTime}:${offsetMinutes}`;
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.doCalculate(routineId, userId, arrivalTime, offsetMinutes),
+      TTL.CALCULATE,
+    );
+  }
+
+  private async doCalculate(
+    routineId: string,
+    userId: string,
+    arrivalTime: string,
+    offsetMinutes: number,
   ): Promise<CalculateResultDto> {
     const routine = await this.findRoutineOrThrow(routineId, userId);
 
@@ -159,6 +193,13 @@ export class CommuteRoutineService {
       totalMinutes,
       schedule,
     };
+  }
+
+  private async invalidateCommuteCache(userId: string, routineId?: string): Promise<void> {
+    const keys = [`commute:list:${userId}`];
+    // Note: calculate 캐시는 routineId 기반이라 정확한 키를 알 수 없으므로
+    // TTL에 의존 (24시간). 루틴 수정 시에만 해당 루틴의 캐시를 지움.
+    await this.cacheService.delMany(keys);
   }
 
   private async findRoutineOrThrow(

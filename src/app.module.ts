@@ -12,6 +12,7 @@ import { LoggerModule } from './common/logger/logger.module';
 import { MorganMiddleware } from './common/middleware/morgan.middleware';
 import { HealthModule } from './health/health.module';
 import { CommuteRoutineModule } from './commute-routine/commute-routine.module';
+import { AppCacheModule } from './common/cache/cache.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CommuteRoutineModule } from './commute-routine/commute-routine.module';
       inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
+    AppCacheModule,
     LoggerModule,
     HealthModule,
     AuthModule,
