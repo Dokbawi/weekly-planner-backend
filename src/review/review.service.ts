@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { WeeklyPlan, TaskStatus } from '../plan/schemas/plan.schema';
 import { ChangeLog, ChangeType } from '../changelog/schemas/changelog.schema';
 import { WeeklyReviewResponseDto, ReviewStatisticsDto, DailyBreakdownDto } from './dto/review.dto';
-import { CacheService } from '../common/cache/cache.service';
+import { CacheService } from '../changelog/common/cache/cache.service';
 
 const TTL = {
   REVIEW: 30 * 60 * 1000, // 30분

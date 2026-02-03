@@ -16,9 +16,9 @@ import {
   CommuteRoutineResponseDto,
   CalculateResultDto,
 } from './dto/commute-routine.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { JwtPayload } from '../common/interfaces/request-with-user.interface';
-import { ApiResponse as ApiRes } from '../common/dto/api-response.dto';
+import { CurrentUser } from '../changelog/common/decorators/current-user.decorator';
+import { JwtPayload } from '../changelog/common/interfaces/request-with-user.interface';
+import { ApiResponse as ApiRes } from '../changelog/common/dto/api-response.dto';
 
 @ApiTags('Commute Routines')
 @ApiBearerAuth()

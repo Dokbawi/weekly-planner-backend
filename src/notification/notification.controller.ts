@@ -2,9 +2,9 @@ import { Controller, Get, Put, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationService } from './notification.service';
 import { NotificationResponseDto, UnreadCountResponseDto } from './dto/notification.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { JwtPayload } from '../common/interfaces/request-with-user.interface';
-import { ApiResponse } from '../common/dto/api-response.dto';
+import { CurrentUser } from '../changelog/common/decorators/current-user.decorator';
+import { JwtPayload } from '../changelog/common/interfaces/request-with-user.interface';
+import { ApiResponse } from '../changelog/common/dto/api-response.dto';
 
 @ApiTags('Notifications')
 @ApiBearerAuth()

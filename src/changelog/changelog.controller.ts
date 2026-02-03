@@ -2,9 +2,9 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ChangelogService } from './changelog.service';
 import { ChangeLogResponseDto } from './dto/changelog.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { JwtPayload } from '../common/interfaces/request-with-user.interface';
-import { ApiResponse } from '../common/dto/api-response.dto';
+import { CurrentUser } from './common/decorators/current-user.decorator';
+import { JwtPayload } from './common/interfaces/request-with-user.interface';
+import { ApiResponse } from './common/dto/api-response.dto';
 
 @ApiTags('Change Logs')
 @ApiBearerAuth()

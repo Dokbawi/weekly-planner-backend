@@ -6,12 +6,13 @@ import { Connection, Model } from 'mongoose';
 import { getConnectionToken, getModelToken } from '@nestjs/mongoose';
 import { ValidationError } from 'class-validator';
 import { AppModule } from '../src/app.module';
-import { GlobalExceptionFilter } from '../src/common/filters/http-exception.filter';
+import { GlobalExceptionFilter } from '../src/changelog/common/filters/http-exception.filter';
 import { User } from '../src/user/schemas/user.schema';
 import { WeeklyPlan } from '../src/plan/schemas/plan.schema';
 import { ChangeLog } from '../src/changelog/schemas/changelog.schema';
 import { Notification } from '../src/notification/schemas/notification.schema';
 import { CommuteRoutine } from '../src/commute-routine/schemas/commute-routine.schema';
+import { WeeklyTemplate } from '../src/template/schemas/template.schema';
 
 export interface TestModule {
   app?: INestApplication;
@@ -129,6 +130,7 @@ export const setupTestGlobal = (testGlobal: TestGlobal, config: TestModuleConfig
       ChangeLog.name,
       Notification.name,
       CommuteRoutine.name,
+      WeeklyTemplate.name,
     ];
 
     for (const modelName of modelsToClear) {

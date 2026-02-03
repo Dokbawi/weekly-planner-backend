@@ -8,11 +8,12 @@ import { PlanModule } from './plan/plan.module';
 import { ChangelogModule } from './changelog/changelog.module';
 import { NotificationModule } from './notification/notification.module';
 import { ReviewModule } from './review/review.module';
-import { LoggerModule } from './common/logger/logger.module';
-import { MorganMiddleware } from './common/middleware/morgan.middleware';
+import { LoggerModule } from './changelog/common/logger/logger.module';
+import { MorganMiddleware } from './changelog/common/middleware/morgan.middleware';
 import { HealthModule } from './health/health.module';
 import { CommuteRoutineModule } from './commute-routine/commute-routine.module';
-import { AppCacheModule } from './common/cache/cache.module';
+import { TemplateModule } from './template/template.module';
+import { AppCacheModule } from './changelog/common/cache/cache.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AppCacheModule } from './common/cache/cache.module';
     NotificationModule,
     ReviewModule,
     CommuteRoutineModule,
+    TemplateModule,
   ],
 })
 export class AppModule implements NestModule {

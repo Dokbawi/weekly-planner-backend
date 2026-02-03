@@ -2,11 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
+import { GlobalExceptionFilter } from './changelog/common/filters/http-exception.filter';
 import { WinstonModule } from 'nest-winston';
-import { winstonConfig } from './common/config/winston.config';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
+import { winstonConfig } from './changelog/common/config/winston.config';
+import { LoggingInterceptor } from './changelog/common/interceptors/logging.interceptor';
+import { PerformanceInterceptor } from './changelog/common/interceptors/performance.interceptor';
 
 async function bootstrap() {
   // Create app with Winston logger
