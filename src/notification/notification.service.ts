@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Notification, NotificationType } from './schemas/notification.schema';
 import { NotificationResponseDto } from './dto/notification.dto';
-import { CacheService } from '../common/cache/cache.service';
+import { CacheService } from '../changelog/common/cache/cache.service';
 
 const TTL = {
   NOTIFICATIONS: 2 * 60 * 1000, // 2분

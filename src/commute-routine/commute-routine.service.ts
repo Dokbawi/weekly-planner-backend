@@ -12,7 +12,7 @@ import {
   CalculateResultDto,
   ScheduleItemDto,
 } from './dto/commute-routine.dto';
-import { CacheService } from '../common/cache/cache.service';
+import { CacheService } from '../changelog/common/cache/cache.service';
 
 const TTL = {
   ROUTINE_LIST: 30 * 60 * 1000,  // 30분

@@ -19,7 +19,7 @@ import {
 } from './dto/plan.dto';
 import { ChangelogService } from '../changelog/changelog.service';
 import { ChangeType } from '../changelog/schemas/changelog.schema';
-import { CacheService } from '../common/cache/cache.service';
+import { CacheService } from '../changelog/common/cache/cache.service';
 
 const TTL = {
   CURRENT_PLAN: 5 * 60 * 1000, // 5분

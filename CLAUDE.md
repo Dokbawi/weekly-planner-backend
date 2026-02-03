@@ -58,6 +58,7 @@ src/
 ├── changelog/         # 변경 추적 시스템
 ├── notification/      # 알림 및 스케줄러
 ├── review/            # 주간 회고
+├── template/          # 주간 템플릿
 ├── commute-routine/   # 출퇴근 계산기
 ├── health/            # 헬스 체크
 └── common/            # 공통 모듈
@@ -92,12 +93,17 @@ Cron 기반 자동 알림 (리마인더, 일일 요약, 계획/회고 알림)
 - 구현: `src/review/review.service.ts`
 - 상세: [IMPLEMENTATION.md#주간-회고](./docs-internal/IMPLEMENTATION.md)
 
-### 5. 출퇴근 계산기
+### 5. 주간 템플릿
+자주 사용하는 주간 일정 패턴 저장 및 계획에 적용
+- 구현: `src/template/template.service.ts`
+- 상세: [TEMPLATE.md](./docs-internal/TEMPLATE.md)
+
+### 6. 출퇴근 계산기
 도착 시간 기준 출발 시간 역산
 - 구현: `src/commute-routine/commute-routine.service.ts`
 - API: `POST /commute-routines/{id}/calculate`
 
-### 6. Redis 캐싱 (Cache-Aside 패턴)
+### 7. Redis 캐싱 (Cache-Aside 패턴)
 읽기 빈도가 높은 API에 캐시 적용, 쓰기 시 자동 무효화
 - 구현: `src/common/cache/cache.module.ts`, `src/common/cache/cache.service.ts`
 - 적용 서비스: plan (5분), notification (2분), commute-routine (30분), review (30분)
@@ -155,6 +161,13 @@ Cron 기반 자동 알림 (리마인더, 일일 요약, 계획/회고 알림)
 | GET | /notifications | 알림 목록 |
 | PUT | /notifications/{id}/read | 알림 읽음 |
 | GET | /today | 오늘 할 일 |
+| POST | /templates | 템플릿 생성 |
+| GET | /templates | 템플릿 목록 조회 |
+| GET | /templates/{id} | 템플릿 상세 조회 |
+| PUT | /templates/{id} | 템플릿 수정 |
+| DELETE | /templates/{id} | 템플릿 삭제 |
+| POST | /templates/from-plan/{planId} | 기존 계획에서 템플릿 생성 |
+| POST | /plans/{planId}/apply-template/{templateId} | 계획에 템플릿 적용 |
 | GET | /commute-routines | 출퇴근 루틴 목록 |
 | POST | /commute-routines | 루틴 생성 |
 | POST | /commute-routines/{id}/calculate | 출발 시간 계산 |
@@ -196,6 +209,8 @@ test/
 │   └── changelog.e2e-spec.ts     # 변경 추적 테스트
 ├── review/
 │   └── review.e2e-spec.ts   # 주간 회고 테스트
+├── template/
+│   └── template.e2e-spec.ts    # 주간 템플릿 테스트
 ├── commute-routine/
 │   └── commute-routine.e2e-spec.ts  # 출퇴근 루틴 테스트
 └── health/

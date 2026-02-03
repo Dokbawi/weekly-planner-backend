@@ -3,9 +3,9 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { RegisterRequestDto, LoginRequestDto, TokenResponseDto, UpdateSettingsDto } from './dto/auth.dto';
 import { UserResponseDto } from '../user/dto/user-response.dto';
-import { ApiResponse as ApiRes } from '../common/dto/api-response.dto';
-import { Public } from '../common/decorators/public.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ApiResponse as ApiRes } from '../changelog/common/dto/api-response.dto';
+import { Public } from '../changelog/common/decorators/public.decorator';
+import { CurrentUser } from '../changelog/common/decorators/current-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Authentication')
