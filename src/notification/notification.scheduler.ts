@@ -1,11 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { NotificationService } from './notification.service';
 import { NotificationType } from './schemas/notification.schema';
 import { WeeklyPlan, PlanStatus, TaskStatus } from '../plan/schemas/plan.schema';
 import { User, DayOfWeek } from '../user/schemas/user.schema';
+import { WithDistributedLock } from '../common/decorators/distributed-lock.decorator';
+
+// 락 TTL (ms) - 작업 시간보다 충분히 길게 설정
+const LOCK_TTL = {
+  TASK_REMINDER: 50000,     // 50초 (매 분 실행, 여유 두기)
+  DAILY_SUMMARY: 300000,    // 5분
+  PLANNING_REMINDER: 300000, // 5분
+  REVIEW_REMINDER: 300000,   // 5분
+};
 
 @Injectable()
 export class NotificationScheduler {
@@ -19,6 +28,7 @@ export class NotificationScheduler {
 
   // 매 분 실행 - Task 알림 체크
   @Cron(CronExpression.EVERY_MINUTE)
+  @WithDistributedLock('checkTaskReminders', LOCK_TTL.TASK_REMINDER)
   async checkTaskReminders() {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
@@ -68,6 +78,7 @@ export class NotificationScheduler {
 
   // 매일 08:00 - 오늘 할 일 요약
   @Cron('0 0 8 * * *')
+  @WithDistributedLock('sendDailySummary', LOCK_TTL.DAILY_SUMMARY)
   async sendDailySummary() {
     const today = new Date().toISOString().split('T')[0];
 
@@ -106,6 +117,7 @@ export class NotificationScheduler {
 
   // 매일 09:00 - 계획 수립 알림 (planningDay인 사용자)
   @Cron('0 0 9 * * *')
+  @WithDistributedLock('sendPlanningReminder', LOCK_TTL.PLANNING_REMINDER)
   async sendPlanningReminder() {
     const today = new Date();
     const dayOfWeek = today.getDay() as DayOfWeek;
@@ -144,6 +156,7 @@ export class NotificationScheduler {
 
   // 매일 18:00 - 회고 알림 (reviewDay인 사용자)
   @Cron('0 0 18 * * *')
+  @WithDistributedLock('sendReviewReminder', LOCK_TTL.REVIEW_REMINDER)
   async sendReviewReminder() {
     const today = new Date();
     const dayOfWeek = today.getDay() as DayOfWeek;
